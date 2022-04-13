@@ -62,7 +62,7 @@
   "lint-staged": {
     "*.{ts,js}": [
       "prettier --write",
-      "eslint --cache --format=stylish --fix"
+      "eslint --cache --format=stylish --fix --resolve-plugins-relative-to"
     ],
     "*.{md,json}": [
       "prettier --write"
