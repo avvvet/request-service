@@ -39,7 +39,7 @@ custom:
   serviceNamePrefix: gateway-contact-service
 
 functions:
-#- ${file(./lambda/lambdaName/config.yml)}
+ - ${file(./lambda/CreateContact/config.yml)}
 resources:
   - Description: contact service
 #  - ${file(./dynamodb/resources.yml)}
