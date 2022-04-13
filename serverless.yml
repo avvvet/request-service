@@ -1,0 +1,48 @@
+service: gateway-contact-service-infra
+configValidationMode: error
+
+package: ${file(./node_modules/@nearprime/serverless/serverless.yml):package}
+plugins: ${file(./node_modules/@nearprime/serverless/serverless.yml):plugins}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  timeout: 5
+  logRetentionInDays: ${self:custom.defaults.logRetentionInDays.${self:provider.stage}}
+  versionFunctions: false
+  tracing:
+    lambda: true
+  stackTags:
+    ServiceName: ${self:service}
+  layers: ${file(./node_modules/@nearprime/serverless/serverless.yml):provider.layers}
+  endpointType: REGIONAL # ApiGateway Endpoint type
+  iam: ${file(./node_modules/@nearprime/serverless/serverless.yml):provider.iam}
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    STAGE: ${self:provider.stage}
+    LOG_LEVEL: ${file(./config/config.${self:provider.stage}.json):LOG_LEVEL}
+    LOG_SAMPLE_RATE: ${file(./config/config.${self:provider.stage}.json):LOG_SAMPLE_RATE}
+    INTERCOM_EVENT_BUS: arn:aws:events:${aws:region}:${self:custom.defaults.accounts.${self:provider.stage}.gateway-intercom}:event-bus/gateway-intercom-${self:provider.stage}-MainEventBus
+    DEFAULT_EVENT_BUS: ${ssm:/${self:custom.serviceName}-infra/eventbridge/MainEventBus/arn}
+
+custom:
+  defaults: ${file(./node_modules/@nearprime/serverless/serverless.yml):custom}
+  invokeLocalEnvironment: ${file(./invokeLocal.env)}
+  alerts: ${file(./node_modules/@nearprime/serverless/serverless.yml):custom.alerts}
+  webpack:
+    webpackConfig: ./node_modules/@nearprime/serverless/webpack.config.js
+    packager: yarn
+    includeModules: false
+
+  serviceNamePrefix: gateway-contact-service
+
+functions:
+#- ${file(./lambda/lambdaName/config.yml)}
+resources:
+  - Description: contact service
+#  - ${file(./dynamodb/resources.yml)}
+#  - ${file(./s3/resources.yml)}
+#  - ${file(./sns/resources.yml)}
+#  - ${file(./sqs/resources.yml)}
